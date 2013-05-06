@@ -284,7 +284,7 @@ exports.create = function (settings) {
     var updateSettings = function () {
         newSettings = newSettings || {}
 
-        if (newSettings.updateInterval) {
+        if (newSettings.updateInterval || newSettings.updateInterval === 0) {
             settings.updateInterval = newSettings.updateInterval
         }
         if (newSettings.matrixTranslate) {
@@ -297,10 +297,32 @@ exports.create = function (settings) {
             settings.words = newSettings.words
         }
         if (newSettings.globalColor) {
-            settings.globalColor = {
-                r: newSettings.globalColor.r || 255,
-                g: newSettings.globalColor.g || 255,
-                b: newSettings.globalColor.b || 255
+            if(isNaN(newSettings.globalColor.r)) {
+                settings.globalColor.r = 255
+            } else if (newSettings.globalColor.r > 255) {
+                settings.globalColor.r = 255
+            } else if (newSettings.globalColor.r < 0) {
+                settings.globalColor.r = 0
+            } else {
+                settings.globalColor.r = newSettings.globalColor.r
+            }
+            if(isNaN(newSettings.globalColor.g)) {
+                settings.globalColor.g = 255
+            } else if (newSettings.globalColor.g > 255) {
+                settings.globalColor.g = 255
+            } else if (newSettings.globalColor.g < 0) {
+                settings.globalColor.g = 0
+            } else {
+                settings.globalColor.g = newSettings.globalColor.g
+            }
+            if(isNaN(newSettings.globalColor.b)) {
+                settings.globalColor.b = 255
+            } else if (newSettings.globalColor.b > 255) {
+                settings.globalColor.b = 255
+            } else if (newSettings.globalColor.b < 0) {
+                settings.globalColor.b = 0
+            } else {
+                settings.globalColor.b = newSettings.globalColor.b
             }
         }
         if (newSettings.channelOrder &&
@@ -318,7 +340,7 @@ exports.create = function (settings) {
         if (newSettings.animation && animations[newSettings.animation]) {
             settings.animation = newSettings.animation
         }
-        if (newSettings.timeDiff) {
+        if (newSettings.timeDiff || newSettings.timeDiff === 0) {
             settings.timeDiff = newSettings.timeDiff
             Date.timeDiff = settings.timeDiff
         }
@@ -370,6 +392,27 @@ exports.create = function (settings) {
         }
     }
 
+    // return list of available animations
+    clock.getAnimations = function () {
+        var arr = [], i
+        for(i in animations) {
+            if (animations.hasOwnProperty(i)) {
+                arr.push(i)
+            }
+        }
+        return arr
+    }
+
+    // return list of available clock modes
+    clock.getModes = function () {
+        var arr = [], i
+        for(i in modes) {
+            if (modes.hasOwnProperty(i)) {
+                arr.push(i)
+            }
+        }
+        return arr
+    }
 
     stripLength = settings.matrixTranslate[0] ?
         settings.matrixTranslate.length * settings.matrixTranslate[0].length : 0

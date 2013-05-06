@@ -14,24 +14,23 @@ exports.create = function (clock) {
     }
 
     var setSettings = function(req, res, next) {
+        var t
         if(req.params.setting && req.contentType === 'application/json') {
             req.params[req.params.setting] = req.params
         } else if (req.params.setting) {
             req.params[req.params.setting] = req.body
         }
+
+        if(req.params.time) {
+            t = Date.parse(req.params.time)
+            if(!isNaN(t)) {
+                req.params.timeDiff = Date.timeDiff + t - Date.now()
+            }
+        }
+
         clock.changeSettings(req.params)
         res.send()
         return next()
-    }
-    var setTime = function (req, res, next) {
-        var t = Date.parse(req.body), diff
-        if(!isNaN(t)) {
-            diff = Date.timeDiff + t.getTime() - Date.now()
-        } else {
-            diff = Date.timeDiff
-        }
-        req.params = {timeDiff: diff}
-        setSettings(req, res, next)
     }
 
 //    server.use(restify.authorizationParser())
@@ -47,11 +46,27 @@ exports.create = function (clock) {
     server.put('/settings', setSettings)
     server.put('/setting/:setting', setSettings)
     server.post('/settings', setSettings)
-    server.post('/setting/:setting', setSettings)
-    server.put('/time', setTime)
-    server.post('/time', setTime)
+    server.post('/setting/:setting', function (req, res, next) {
+        req.params = {time: req.body}
+        setSettings(req, res, next)
+    })
+    server.put('/time', function (req, res, next) {
+        req.params = {time: req.body}
+        setSettings(req, res, next)
+    })
+    server.post('/time', setSettings)
+
     server.get('/time', function (req, res, next) {
-        res.send(new Date())
+        res.send(new Date(Date.now()))
+        return next()
+    })
+
+    server.get('/animations', function (req, res, next) {
+        res.send(clock.getAnimations())
+        return next()
+    })
+    server.get('/modes', function (req, res, next) {
+        res.send(clock.getModes())
         return next()
     })
 
